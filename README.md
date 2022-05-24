@@ -6,6 +6,13 @@
 
 With this tutorial you will hopefully be able to define the programming language PCF in the [Spoofax language workbench](https://www.spoofax.dev/spoofax-pie/develop/) in around one hour. The `tutorial` directory contains a minimal project setup that allows you to start implementing PCF. Based on this tutorial, you are hopefully able to implement the syntax and static semantics of PCF yourself. In case you get stuck, you can always peek at the example implementation in the `implementation` directory. 
 
+## Getting started
+
+- Download Spoofax
+- Import Project
+- Build
+- Where to find relevant files
+
 ## Source material for PCF
 
 Since the original publications on PCF were more concerned with semantics than syntax, it is a bit difficult to trace the syntax of PCF. We will use the definition of PCF from a book by John C. Mitchell called "Foundation for Programming Languages" (Mitchell 1996). Note that you might also find a definition by Dowek and Levy (Dowek et al. 2011) called Mini-ML, or PCF, this is not the version that we will use here. Chapter 2 of Foundation for Programming Languages about the language PCF is [freely available](https://theory.stanford.edu/~jcm/books/fpl-chap2.ps).
@@ -48,6 +55,16 @@ As you can see, PCF is a small functional programming language. It is an express
 The grammar in the book is more type-directed, which constrains what programs the parser can parse to already be closer to the set of programs that are actually typed and therefore in the language. While this might seem advantageous, in practice it is nicer for a user to have a wide range of programs parse and be given highlighting. The type checker can give a much clearer explanation of why a program is not acceptable than a parser based on a grammar that encodes some type information. 
 
 ### SDF3
+
+With a context-free grammar available to us, we can start implementing the syntax of PCF in Spoofax. For this we use SDF3, the Syntax Definition Formalism version 3. You'll find that the `tutorial` project already has some `.sdf3` files ready for you. 
+
+- Explain lexical syntax
+- Note files for expressions and types
+- Note SPT tests
+- Suggest to write the pure pcf rules above
+- Suggest more SPT tests to try it out, including AST
+- Explain priorities and disambiguation
+- SPT tests with parse to another program with parentheses
 
 ## Static Semantics
 
