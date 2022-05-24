@@ -4,11 +4,11 @@
 
 -- https://en.wikipedia.org/wiki/Programming_Computable_Functions
 
-The `tutorial` directory contains a minimal project setup that allows you to start implementing PCF in the [Spoofax language workbench](https://www.spoofax.dev/spoofax-pie/develop/). Based on the instructions you find and the description of the language, you can most likely implement PCF yourself. But in case you get stuck, you can always peek at the example implementation in the `implementation` directory. 
+With this tutorial you will hopefully be able to define the programming language PCF in the Spoofax language workbench in around one hour. The `tutorial` directory contains a minimal project setup that allows you to start implementing PCF in the [Spoofax language workbench](https://www.spoofax.dev/spoofax-pie/develop/). Based on this tutorial, you can implement the syntax and static semantics of PCF yourself. In case you get stuck, you can always peek at the example implementation in the `implementation` directory. 
 
 ## Source material for PCF
 
-Since the original publications on PCF were more concerned with semantics than syntax, it is a bit difficult to trace the syntax of PCF. We will use the definition of PCF from a book by John C. Mitchell called "Foundation for Programming Languages" (Mitchell 1996). Note that you might also find a definition by Dowek and Levy (Dowek et al. 2011) called Mini-ML or PCF online, this is not the version that we will use here. [Chapter 2 of Foundation for Programming Languages](https://theory.stanford.edu/~jcm/books/fpl-chap2.ps) is all about the language PCF.
+Since the original publications on PCF were more concerned with semantics than syntax, it is a bit difficult to trace the syntax of PCF. We will use the definition of PCF from a book by John C. Mitchell called "Foundation for Programming Languages" (Mitchell 1996). Note that you might also find a definition by Dowek and Levy (Dowek et al. 2011) called Mini-ML, or PCF, this is not the version that we will use here. Chapter 2 of Foundation for Programming Languages about the language PCF is [freely available](https://theory.stanford.edu/~jcm/books/fpl-chap2.ps).
 
 ## Grammar
 
@@ -19,8 +19,6 @@ e ::= x                            (variable reference)
   | if e then e else e             (if condition)
   | \x : t. e                      (function abstraction)
   | e e                            (function application)
-  | (e, e)                         (pair creation)
-  | Proj1 e | Proj2 e              (pair projection)
   | fix x e                        (fixed point)
   | true  | false                  (boolean constants)
   | Eq? e e                        (equality check)
@@ -30,7 +28,6 @@ e ::= x                            (variable reference)
 
 t ::= nat                          (natural number type)
   | bool                           (boolean type)
-  | t * t                          (pair type)
   | t -> t                         (function type)
   | (t)                            (parenthesised type)
 ```
@@ -44,12 +41,11 @@ e ::= ...
   | letrec x : t = e               (let recursive binding)
   | letrec x(x : t) : t = e        (let recursive binding)
   | \(x : t, x : t). e             (curried function abstraction)
-  | let (x : t, x : t) = e in e    (pair destructuring let binding)
 ```
 
-As you can see, PCF is a small functional programming language. It is an expression based language where `e` is the expression sort, and `t` is the type sort. There are also lexical sorts in this grammar, namely `x` for names, and `n` for numeric constants. The other words and symbols are keywords and operators. We've replace some of the non-ASCII notation from the book into an ASCII version to make it easier to type, but if you have a good input method for non-ascii symbols, feel free to use those in your grammar. We've also added parentheses to both sorts for grouping. 
+As you can see, PCF is a small functional programming language. It is an expression based language where `e` is the expression sort, and `t` is the type sort. There are also lexical sorts in this grammar, namely `x` for names, and `n` for numeric constants. The other words and symbols are keywords and operators. We've replace some of the non-ASCII notation from the book into an ASCII version to make it easier to type, but if you have a good input method for non-ascii symbols, feel free to use those in your grammar. We've also added parentheses to both sorts for grouping. We have excluded pairs from the grammar, to make the language a little smaller and hopefully make this tutorial completable in one hour. 
 
-The grammar in the book is also more type-directed, which constrains what programs the parser can parse to already be closer to the set of programs that are actually typed and therefore in the language. While this might seem advantageous, in practice it is nicer for a user to have a wide range of programs parse and be given highlighting. The type checker can give a much clearer explanation of why a program is not acceptable than a parser based on a grammar that encodes some type information. 
+The grammar in the book is more type-directed, which constrains what programs the parser can parse to already be closer to the set of programs that are actually typed and therefore in the language. While this might seem advantageous, in practice it is nicer for a user to have a wide range of programs parse and be given highlighting. The type checker can give a much clearer explanation of why a program is not acceptable than a parser based on a grammar that encodes some type information. 
 
 ### SDF3
 
