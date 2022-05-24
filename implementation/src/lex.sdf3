@@ -4,11 +4,20 @@ lexical sorts
 
   Name
   Number
+  Keyword
 
 lexical syntax
 
   Name = [A-Za-z] [A-Za-z0-9\_]*
   Number = [0-9]+
+
+lexical syntax
+
+  Keyword = "if"   | "then"  | "else" |
+            "true" | "false" |
+            "fix"
+
+  Name = Keyword {reject}
 
 lexical restrictions
 
