@@ -3,6 +3,7 @@ module start
 imports
 
   lex
+  comment
   type
   expr
 

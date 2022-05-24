@@ -1,0 +1,21 @@
+module comment
+
+lexical sorts
+
+  NewLineEOF
+  EOF
+
+lexical syntax
+
+  LAYOUT         = "//" ~[\n\r]* NewLineEOF
+  NewLineEOF     = [\n\r]
+  NewLineEOF     = EOF
+  EOF            =
+
+lexical restrictions
+
+  EOF         -/- ~[]
+
+context-free restrictions
+
+  LAYOUT? -/- [\/].[\/]
