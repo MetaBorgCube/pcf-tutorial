@@ -1,0 +1,33 @@
+module expr
+
+imports
+
+  lex
+  type
+
+context-free sorts
+
+  Expr
+
+context-free syntax
+
+  Expr.Var = Name
+  Expr.If = [if [Expr] then [Expr] else [Expr]]
+  Expr.Lam = [\[Name] : [Type]. [Expr]]
+  Expr.App = [[Expr] [Expr]] {left}
+  Expr.Fix = [fix [Name] [Expr]]
+  Expr.True = [true]
+  Expr.False = [false]
+  Expr.Eq = [Eq? [Expr] [Expr]]
+  Expr.Num = Number
+  Expr.Add = [[Expr] + [Expr]] {left}
+  Expr = [([Expr])] {bracket}
+
+context-free priorities
+
+  Expr.Eq >
+  Expr.App >
+  Expr.Add >
+  { Expr.If
+    Expr.Lam
+    Expr.Fix }

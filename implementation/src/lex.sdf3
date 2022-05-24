@@ -1,0 +1,24 @@
+module lex
+
+lexical sorts
+
+  Name
+  Number
+
+lexical syntax
+
+  Name = [A-Za-z] [A-Za-z0-9\_]*
+  Number = [0-9]+
+
+lexical restrictions
+
+  Name -/- [A-Za-z0-9\_]
+  Number -/- [0-9]
+
+lexical syntax
+
+  LAYOUT = [\ \n\v\f\r]
+
+context-free restrictions
+
+  LAYOUT? -/- [\ \n\v\f\r]

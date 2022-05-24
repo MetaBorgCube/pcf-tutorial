@@ -1,0 +1,20 @@
+module test
+
+test parse empty
+    [[]]
+  parse fails
+
+test parse plus
+    [[1 + 1 + 1]]
+  parse to
+    [[(1 + 1) + 1]]
+
+test parse app
+    [[a b c]]
+  parse to
+    [[(a b) c]]
+
+test parse eq
+    [[Eq? a b c]]
+  parse to
+    [[(Eq? a b) c]]

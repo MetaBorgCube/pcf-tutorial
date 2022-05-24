@@ -1,0 +1,28 @@
+module main
+
+imports
+
+  statixruntime
+  statix/api
+  injections/-
+  signatures/start-sig
+  pp
+  completion
+
+rules // Analysis
+
+  pre-analyze :: ? -> ?
+  pre-analyze  = explicate-injections-pcf-Start
+
+  post-analyze :: ? -> ?
+  post-analyze = implicate-injections-pcf-Start
+
+
+  editor-analyze :: ? -> ?
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+
+  editor-resolve :: ? -> ?
+  editor-resolve = stx-editor-resolve
+
+  editor-hover :: ? -> ?
+  editor-hover   = stx-editor-hover

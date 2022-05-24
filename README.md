@@ -4,7 +4,7 @@
 
 -- https://en.wikipedia.org/wiki/Programming_Computable_Functions
 
-With this tutorial you will hopefully be able to define the programming language PCF in the Spoofax language workbench in around one hour. The `tutorial` directory contains a minimal project setup that allows you to start implementing PCF in the [Spoofax language workbench](https://www.spoofax.dev/spoofax-pie/develop/). Based on this tutorial, you can implement the syntax and static semantics of PCF yourself. In case you get stuck, you can always peek at the example implementation in the `implementation` directory. 
+With this tutorial you will hopefully be able to define the programming language PCF in the [Spoofax language workbench](https://www.spoofax.dev/spoofax-pie/develop/) in around one hour. The `tutorial` directory contains a minimal project setup that allows you to start implementing PCF. Based on this tutorial, you are hopefully able to implement the syntax and static semantics of PCF yourself. In case you get stuck, you can always peek at the example implementation in the `implementation` directory. 
 
 ## Source material for PCF
 
@@ -20,7 +20,7 @@ e ::= x                            (variable reference)
   | \x : t. e                      (function abstraction)
   | e e                            (function application)
   | fix x e                        (fixed point)
-  | true  | false                  (boolean constants)
+  | true | false                   (boolean constants)
   | Eq? e e                        (equality check)
   | n                              (natural number constant)
   | e + e                          (arithmetic operations)

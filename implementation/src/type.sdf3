@@ -1,0 +1,17 @@
+module type
+
+imports
+
+  lex
+
+context-free sorts
+
+  Type
+
+context-free syntax
+
+  Type.Nat = [nat]
+  Type.Bool = [bool]
+  Type.Fun = [[Type] -> [Type]] {right}
+  Type = [([Type])] {bracket}
+  
