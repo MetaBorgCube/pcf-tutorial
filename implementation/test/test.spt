@@ -18,3 +18,29 @@ test parse eq
     [[Eq? a b c]]
   parse to
     [[(Eq? a b) c]]
+
+// Statix semantics
+
+test lambda-bound var
+    [[\ x: nat. x]]
+  analysis succeeds
+
+test lambda-bound outer var
+    [[\x: nat. \y: bool. x + 1]]
+  analysis succeeds
+
+test mu-bound var
+    [[fix x x]]
+  analysis succeeds
+
+test closest var - positive
+    [[\x: bool. \ x: nat. x + 1]]
+  analysis succeeds
+
+test closest var - negative
+    [[\x: nat. \ x: bool. x + 1]]
+  analysis fails
+
+test unbound var
+    [[x]]
+  analysis fails
