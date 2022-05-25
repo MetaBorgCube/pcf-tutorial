@@ -8,6 +8,7 @@ imports
   signatures/start-sig
   pp
   completion
+  desugar
 
 rules // Analysis
 

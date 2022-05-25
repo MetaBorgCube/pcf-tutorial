@@ -1,0 +1,107 @@
+module desugar
+
+imports
+
+  strategolib
+  signatures/-
+
+strategies
+
+  desugar :: TP
+  desugar = topdown(try(desugar-let))
+
+rules
+
+  desugar-let :: TP
+
+  desugar-let:
+    Let(x, t, e1, e2) -> 
+      App(Lam(x, t, e2), e1)
+
+  desugar-let:
+    LetF(x1, x2, t1, t2, e1, e2) ->
+      App(Lam(x1, Fun(t1, t2), e2), Lam(x2, t1, e1))
+
+  desugar-let:
+    LetRec(x, t, e1, e2) -> 
+      App(Lam(x, t, e2), Fix(Lam(x, t, e1)))
+
+  desugar-let:
+    LetRecF(x1, x2, t1, t2, e1, e2) ->
+      App(Lam(x1, Fun(t1, t2), e2), Fix(Lam(x1, Fun(t1, t2), Lam(x2, t1, e1))))
+
+strategies
+
+  desugar2 :: TP
+  desugar2 = outermost(desugar-let2)
+
+rules
+
+  desugar-let2 :: TP
+
+  desugar-let2:
+    Let(x, t, e1, e2) -> 
+      App(Lam(x, t, e2), e1)
+
+  desugar-let2:
+    LetF(x1, x2, t1, t2, e1, e2) ->
+      Let(x1, Fun(t1, t2), Lam(x2, t1, e1), e2)
+
+  desugar-let2:
+    LetRec(x, t, e1, e2) -> 
+      Let(x, t, Fix(Lam(x, t, e1)), e2)
+
+  desugar-let2:
+    LetRecF(x1, x2, t1, t2, e1, e2) ->
+      LetRec(x1, Fun(t1, t2), Lam(x2, t1, e1), e2)
+
+signature
+  sorts
+    LetKind
+  constructors
+    Normal : LetKind
+    Rec    : LetKind
+
+    Let    : LetKind * Name * Type * Expr * Expr -> Expr
+    LetF   : LetKind * Name * Name * Type * Type * Expr * Expr -> Expr
+
+strategies
+
+  desugar3 :: TP
+  desugar3 =
+    topdown(desugar-let3a)
+  ; outermost(desugar-let3b)
+
+rules
+
+  desugar-let3a :: TP
+  
+  desugar-let3a:
+    Let(x, t, e1, e2) ->
+      Let(Normal(), x, t, e1, e2)
+  
+  desugar-let3a:
+    LetF(x1, x2, t1, t2, e1, e2) ->
+      LetF(Normal(), x1, x2, t1, t2, e1, e2)
+  
+  desugar-let3a:
+    LetRec(x, t, e1, e2) ->
+      Let(Rec(), x, t, e1, e2)
+  
+  desugar-let3a:
+    LetRecF(x1, x2, t1, t2, e1, e2) ->
+      LetF(Rec(), x1, x2, t1, t2, e1, e2)
+
+  desugar-let3b :: TP
+
+  desugar-let3b:
+    Let(Normal(), x, t, e1, e2) -> 
+      App(Lam(x, t, e2), e1)
+
+  desugar-let3b:
+    Let(Rec(), x, t, e1, e2) -> 
+      Let(x, t, Fix(Lam(x, t, e1)), e2)
+
+  desugar-let3b:
+    LetF(k, x1, x2, t1, t2, e1, e2) ->
+      Let(k, x1, Fun(t1, t2), Lam(x2, t1, e1), e2)

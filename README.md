@@ -72,8 +72,8 @@ These are the syntactic extensions (syntactic sugar) found in the book we're fol
 e ::= ...
   | let x : t = e in e             (let binding)
   | let x(x : t) : t = e in e      (let function binding)
-  | letrec x : t = e               (let recursive binding)
-  | letrec x(x : t) : t = e        (let recursive binding)
+  | letrec x : t = e in e          (let recursive binding)
+  | letrec x(x : t) : t = e in e   (let recursive binding)
 ```
 
 These extensions are defined as sugar, in that you can transform them into an equivalent program using only the "pure pcf" syntax. That's exactly how we will also implement this sugar.
@@ -98,8 +98,11 @@ letrec x1(x2 : t1) : t2 = e1 in e2
   == (\x1 : t1 -> t2. e2) (fix \x1 : t1 -> t2. \x2 : t1. e1)
 ```
 
+As you can see, we can use lambdas for binding variables in a `let`, and we can use `fix` for recursive definitions in `letrec`. Function definition syntax in `let` is of course also just sugar for lambdas. 
+
 ### Stratego 2
 
+Let's turn these equations into executable code. We will use the term-writing language Stratego 2 for this task. You can find code of this language in `.str2` files such as `src/`
 
 
 ## Static Semantics

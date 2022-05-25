@@ -31,3 +31,19 @@ context-free priorities
   { Expr.If
     Expr.Lam
     Expr.Fix }
+
+context-free syntax
+
+  Expr.Let = [let [Name] : [Type] = [Expr] in [Expr]]
+  Expr.LetF = [let [Name]([Name] : [Type]) : [Type] = [Expr] in [Expr]]
+  Expr.LetRec = [letrec [Name] : [Type] = [Expr] in [Expr]]
+  Expr.LetRecF = [letrec [Name]([Name] : [Type]) : [Type] = [Expr] in [Expr]]
+
+context-free priorities
+
+  Expr.Add >
+  { Expr.Let
+    Expr.LetF
+    Expr.LetRec
+    Expr.LetRecF }
+  

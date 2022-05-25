@@ -14,8 +14,8 @@ lexical syntax
 lexical syntax
 
   Keyword = "if"   | "then"  | "else" |
-            "true" | "false" |
-            "fix"
+            "true" | "false" | "fix" |
+            "let" | "letrec" | "in"
 
   Name = Keyword {reject}
 
