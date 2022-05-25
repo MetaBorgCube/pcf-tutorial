@@ -1,0 +1,76 @@
+module expr
+
+imports
+
+  signatures/expr-sig
+  signatures/type-sig
+
+rules
+
+  typeOfExpr: scope * Expr -> Type
+
+  typeOfExpr(s, True()) = Bool().
+  typeOfExpr(s, False()) = Bool().
+
+  typeOfExpr(s, Num(_)) = Nat().
+
+  typeOfExpr(s, Add(e1, e2)) = Nat() :-
+    typeOfExpr(s, e1) == Nat(),
+    typeOfExpr(s, e2) == Nat().
+
+  typeOfExpr(s, Eq(e1, e2)) = Bool() :- {T}
+    typeOfExpr(s, e1) == T,
+    typeOfExpr(s, e2) == T.
+
+  typeOfExpr(s, If(c, e1, e2)) = T :-
+    typeOfExpr(s, c) == Bool(),
+    typeOfExpr(s, e1) == T,
+    typeOfExpr(s, e2) == T.
+
+  typeOfExpr(s, App(e1, e2)) = T :- {T'}
+    typeOfExpr(s, e1) == Fun(T', T),
+    typeOfExpr(s, e2) == T'.
+
+signature
+
+  name-resolution
+    labels P
+
+  relations
+    var: Name -> Type
+
+rules
+
+  typeOfExpr(s, Lam(x, T, e)) = Fun(T, T') :- {s_lam}
+    new s_lam,
+    s_lam -P-> s,
+    !var[x, T] in s_lam,
+    typeOfExpr(s_lam, e) == T'.
+
+  typeOfExpr(s, Fix(x, e)) = T :- {s_fix}
+    new s_fix,
+    s_fix -P-> s,
+    !var[x, T] in s_fix,
+    typeOfExpr(s_fix, e) == T.
+
+  typeOfExpr(s, Var(x)) = T :- {Ts}
+    query var
+      filter P* and { x' :- x' == x }
+         min $ < P
+          in s |-> Ts,
+    referenceTypeOk(x, T, Ts).
+
+rules // Handle variable query result properly.
+
+  referenceTypeOk: Name * Type * list((path * (Name * Type)))
+
+  referenceTypeOk(x, _, []) :-
+    false | error $[Could not resolve variable [x].].
+
+  referenceTypeOk(x, T, [(_, (x', T'))]) :-
+    T == T' | error $[Expected [x] to have type [T], but was [T'].],
+    @x.type := T,
+    @x.ref := x'.
+
+  referenceTypeOk(x, _, [_ | _]) :-
+    false | error $[Reference to [x] is ambiguous.].

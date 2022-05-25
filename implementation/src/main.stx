@@ -3,8 +3,11 @@ module main
 imports
 
   signatures/start-sig
+  expr
 
 rules
 
   programOk : Start
-  programOk(_).
+  programOk(Expr2Start(e)) :- {s_glob}
+    new s_glob,
+    typeOfExpr(s_glob, e) == _.
