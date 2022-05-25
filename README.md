@@ -114,17 +114,17 @@ We _could_ also write our desugaring differently, in the smaller steps of the eq
 
 ## Static Semantics
 
-PCF has a simple type system, defined as follows:
+PCF has a relatively simple type system, defined as follows:
 
 ```
------------- [T-Nat]
-Γ |- n : nat
-
 ---------------- [T-True]
 Γ |- true : bool
 
 ----------------- [T-False]
 Γ |- false : bool
+
+------------ [T-Nat]
+Γ |- n : nat
 
 
 Γ |- e1 : nat
@@ -148,7 +148,7 @@ PCF has a simple type system, defined as follows:
 ---------- [T-Var]
 Γ |- x : t
 
-Γ; (x, t) |- e : t'
+(x, t); Γ |- e : t'
 ------------------------ [T-Abs]
 Γ |- \x : t. e : t -> t'
 
@@ -163,9 +163,144 @@ PCF has a simple type system, defined as follows:
 Γ |- fix e : t
 ```
 
+In this type system, all constructs have monomorphic types. The equality operator accepts any operands, as long as the types of the left and right operand are equal. Similarly, the types of the then-branch and the else-branch of an if-expression should be equal. Variables are typed in a typing environment Γ, which is extended by lambda abstractions. This is all similar to the regular definition of the lambda calculus (see e.g. Pierce (2002), chap. 9). The typing rule for the fixpoint operator ensures its argument is an endofunction, and types it with the (co)domain of the function.
+
 ### Statix
+
+Given this type system and a parser derived from the syntax specification, we can start defining our type-checker in Spoofax. We use the Statix meta-language for type system specification for this. In Statix, type-systems can be expressed in a declarative style, closely related to formal inference rules, such as given above. However, instead of typing environments, _scope graphs_ are used for name binding. (Scope Graphs will be explained in more detail later in this tutorial.) The backend (often referred to as 'solver') interprets the specification applied to an AST of the object language (PCF in this case) as a constraint program, which yields an executable type checker.
+
+- TODO: give some instructions on preparing a proper debug environment.
+
+So let's get started. We will define our type-system in the `src/expr.stx` file. This file already imports `expr-sig` and `type-sig`, which makes the abstract syntax of the language, which is derived from the syntax definition, available. In addition, there is a declaration for a user-defined constraint `typeOfExpr`, which has type `scope * Expr -> Type`. That means that the constraint accepts a `scope` and an expression, and returns a type for it. This can be read as `Γ |- e : t`, where the `scope` argument takes the role of the environment Γ.
+
+A lonely constraint declaration is useless: there are no ways a `typeOfExpr` constraint can be solved. We need to add _rules_ for this constraint. Rules can be compared to _cases_ in a functional language or, even better, inference rules as given above. Lets look at an example:
+
+```
+typeOfExpr(_, True()) = Bool().
+```
+
+This rule states the simple fact that a `true` constant has type `bool`. Do you see the similarity with our `T-True` rule?
+
+> Exercise: Define the `T-False` and `T-Nat` rules in your Statix specification.
+
+That was not too hard. However, not all rules are that simple. Some of them have _premises_. In Statix, we encode them after a turnstile symbol `:-`. For example:
+
+```
+typeOfExpr(s, Eq(e1, e2)) = Bool() :- {T}
+  typeOfExpr(s, e1) == T,
+  typeOfExpr(s, e2) == T.
+```
+
+This rule is a bit more complicated, so lets break it down part by part. The meaning of the _rule head_ (`typeOfExpr(s, Eq(e1, e2)) = Bool()`) should be familiar by now. An equality comparison in scope `s` has type `Bool()`. Then, after the turnstile, there is an _existential_ constraint `{T}`, which introduced the unification variable `T`. One might read it as `∃ T. ...`. Then there are two _premises_ of the rule that assert that `e1` and `e2` have the type `T`. As a unification variable can only have a single value, this effectively enforces both operands to have the same type.
+
+> Exercise: Define the `T-Add` and `T-If` rules.
+
+It is also possible to use SPT to test your type system. To apply the type-checker in a test, use the `analysis succeeds` and `analysis fails` expectations. For example:
+
+```
+test cannot compare nat and bool [[
+  Eq? true 42
+]] analysis fails
+```
+
+> Exercise: Define some SPT tests that cover all currently typed constructs.
+
+#### Scope Graphs
+
+Now it is time to look add lambda abstractions and applications. In Statix, typing these constructs uses scope graphs. We will explore how scope graphs work using some example programs.
+
+The rule for lambda abstraction should already defined as follows:
+
+```
+typeOfExpr(s, Lam(x, T, e)) = Fun(T, T') :- {s_lam}
+  new s_lam,
+  s_lam -P-> s,
+  !var[x, T] in s_lam,
+  typeOfExpr(s_lam, e) == T'.
+```
+
+In this rule, a lambda expression gets the type `Fun(T, T')`. The input type `T` is explicitly provided by the syntax, while the result type `T'` is inferred from the lambda body. However, as can be seen in the `T-Abs` rule, the body is typed in an _extended context_. In Statix, that is encoded by the first three constraints. The `new s_lam` constraint generates a fresh node in the scope graph, and binds a reference to that node to the unification variable `s_lam`. That scope encodes the context of the body. To indicate that `s_lam` inherits all declarations from its parent context (Γ in the rule), the `s_lam -P-> s` constraints asserts an _edge_ from `s_lam` to `s`. This ensures that a query in `s_lam` (explained later) can reach declarations in `s`. The edge is labeled with an edge label `P`. In Statix all edges are labeled, and labels have to be introduced explicitly. In the stub, the label `P` was already predefined in the `signature` section above the rule for abstractions.
+Finally, we need to _extend_ the `s_lam` context with our new variable. This is what the `!var[x, T] in s_lam` constraint does. This constraint, which is similar to the `(x, t);` in `T-Abs`, creates a declaration with name `x` and type `T` in `s_lam`. A declaration always uses a _relation_, which is `var` in this case. The `var` relation is also declared in the `signature` section above.
+
+To aid debugging, scope graph can be inspected. For example, open an `example.pcf` file, and add this program:
+
+```
+(\double: nat -> nat. double 21) \x: nat. x + x
+```
+
+Now, open the menu `Spoofax > Debug > Show formatted scope graph (continuous)`. A new window should be opened with (approximately) this content:
+
+```
+scope graph
+  #-s_lam_20-4 {
+    relations {
+      expr!var : ("double", Fun(Nat(), Nat()))
+    }
+    edges {
+      expr!P : #-s_glob_1-5
+    }
+  }
+  #-s_lam_10-2 {
+    relations {
+      expr!var : ("x", Nat())
+    }
+    edges {
+      expr!P : #-s_glob_1-5
+    }
+  }
+```
+
+This file shows two scopes: `#-s_lam_20-4` and `#-s_lam_10-2`. These scopes correspond to the bodies of the first and second abstraction, respectively. Both scopes have a single declaration, shown in the `relations` block. The contents of the relations should not be surprising: they are the declarations we asserted using our `!var[x, T] in s_lam` constraint! Similarly, there are two `P`-labeled edges to `#s_glob_1-5`. This scope is the global scope, which does not have its own entry because it is empty. In fact, it corresponds to the empty top-level environment a regular typing derivation would start with.
+
+Now, we have seen how to extend a context, but how should we read it? Reading a context corresponds to doing a _query_ in Statix. In PCF, the only time we use a query is when resolving a variable in the `T-Var` rule. In Statix, this rule is defined as follows:
+
+```
+typeOfExpr(s, Var(x)) = T :- {Ts}
+  query var
+    filter P* and { x' :- x' == x }
+       min $ < P
+        in s |-> Ts,
+  referenceTypeOk(x, T, Ts).
+```
+
+We ignore the `referenceTypeOk` constraint for now, as it is only there to ensure the error messages are easier to interpret. The interesting part is the `query` constraint. This constraint takes quite some parameters, which we will analyze one by one.
+
+First, there is the `var` parameter, which is the relation to query. In languages that, unlike PCF, have multiple relations, this argument ensures that the query will only find declarations under the `var` relation, such as the ones asserted by the `T-Abs` rule we've discussed earlier.
+Second, there is the `P*` argument. This is a regular expression that describes valid paths in the scope graph. In this case, it ensures that the query can resolve in the local context, and all parent contexts.
+
+> Exercise. Change `P*` into `P+` and test the program `\x: nat. x`. Does it type correctly? Why (not)?
+
+Third, there is the _data well-formedness_ condition `{ x' :- x' == x }`. This is an anynomous unary predicate that compares the name of a declaration (bound to `x'`) to the reference (`x`). Only declarations for which the constraint holds (i.e., `x' == x` can be solved) are returned in the query answer. This excludes reachable declarations with the wrong name.
+
+> Exercise. Change `{ x' :- x' == x }` to `{ x' :- true }` and test the program `\x: nat. \y: bool. x + 1`. Does it type correctly? Why (not)?
+
+Fourth, there is the `$ < P` argument. This argument indicates that the end-of-path label `$` _binds closer_ than the `P` label. This means that shorter paths are preferred over longer paths, essentially modeling shadowing. This is best seen in action:
+
+> Exercise. Remove `$ < P` and test the program `\x: bool. \x: nat. x + 1`. Does it type correctly? Why (not)?
+
+> Exercise. Add `P < $` and test the program `\x: bool. \x: nat. x + 1`. Does it type correctly? Why (not)?
+
+> Exercise: Define the `T-App` and `T-Fix` rules.
+
+Congratulations! You have now defined a fully functional frontend for PCF.
+
+### A Small Detour on Editor Services.
+
+Type information is often used for editor services and transformations. This is tightly integrated in the Spoofax language as well. For example, hover your mouse over a variable reference for a moment. After some time, a tooltip with (e.g.) the text `Type: Nat()` will show up. Or, even fancier, CTRL-Click (Cmd-Click on Mac) on a reference. Your cursor now should jump to the binder that introduced the variable.
+
+To understand this behavior, we have to look into the second `referenceTypeOk` rule. This rule contains the following constraints:
+
+```
+@x.type := T,
+@x.ref := x'
+```
+
+In this rule `x` is the reference, and `T` is the expected type. The constraint `@x.type := T` sets the value of the `type` _property_ of `x` to `T`. The Spoofax editor will read such `type` properties and display them in a tooltip. That explains the tooltip we observed earlier.
+
+In addition, the `x'` variable is the name of the declaration. Unobservable to the user, this name has its position attached. By assigning it as the `ref` property of the reference `x`, the editor reference resolution knew where to put the cursor when `x` was CTRL-clicked!
 
 ## References
 
 - (Mitchell 1996) Mitchell, John C. (1996). The Language PCF. In: Foundations for Programming Languages. https://theory.stanford.edu/~jcm/books/fpl-chap2.ps
 - (Dowek et al. 2011) Dowek, G., Lévy, JJ. (2011). The Language PCF. In: Introduction to the Theory of Programming Languages. Undergraduate Topics in Computer Science. Springer, London. https://doi.org/10.1007/978-0-85729-076-2_2
+- (Pierce 2002) Pierce, Benjamin C. (2002). Types and Programming Languages. MIT Press, Cambridge, Massachusetts.
