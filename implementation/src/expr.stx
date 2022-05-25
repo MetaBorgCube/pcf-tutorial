@@ -71,3 +71,8 @@ rules // Handle variable query result properly.
 
   referenceTypeOk(x, _, [_ | _]) :-
     false | error $[Reference to [x] is ambiguous.].
+
+rules // Catch-all rule, useful during development
+
+  typeOfExpr(_, e) = _ :-
+    try { false } | note $[No type inference rule for [e] specified yet.].
