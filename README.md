@@ -50,7 +50,7 @@ e ::= ...
   | \(x : t, x : t). e             (curried function abstraction)
 ```
 
-As you can see, PCF is a small functional programming language. It is an expression based language where `e` is the expression sort, and `t` is the type sort. There are also lexical sorts in this grammar, namely `x` for names, and `n` for numeric constants. The other words and symbols are keywords and operators. We've replace some of the non-ASCII notation from the book into an ASCII version to make it easier to type, but if you have a good input method for non-ascii symbols, feel free to use those in your grammar. We've also added parentheses to both sorts for grouping. We have excluded pairs from the grammar, to make the language a little smaller and hopefully make this tutorial completable in one hour.
+As you can see, PCF is a small functional programming language. It is an expression based language where `e` is the expression sort, and `t` is the type sort. There are also lexical sorts in this grammar, namely `x` for names, and `n` for numeric constants. The other words and symbols are keywords and operators. We've replaced some of the non-ASCII notation from the book into an ASCII version to make it easier to type, but if you have a good input method for non-ascii symbols, feel free to use those in your grammar. We've also added parentheses to both sorts for grouping. We have excluded pairs from the grammar, to make the language a little smaller and hopefully make this tutorial completable in one hour.
 
 The grammar in the book is more type-directed, which constrains what programs the parser can parse to already be closer to the set of programs that are actually typed and therefore in the language. While this might seem advantageous, in practice it is nicer for a user to have a wide range of programs parse and be given highlighting. The type checker can give a much clearer explanation of why a program is not acceptable than a parser based on a grammar that encodes some type information.
 
@@ -67,6 +67,50 @@ With a context-free grammar available to us, we can start implementing the synta
 - SPT tests with parse to another program with parentheses
 
 ## Static Semantics
+
+PCF has a simple type system, defined as follows:
+
+```
+------------- [T-Nat]
+Γ |- n : nat
+
+---------------- [T-True]
+Γ |- true : bool
+
+----------------- [T-False]
+Γ |- false : bool
+
+
+Γ |- e1 : nat    Γ |- e2 : nat
+------------------------------ [T-Add]
+      Γ |- e1 + e2 : nat
+
+Γ |- e1 : t    Γ |- e2 : t
+---------------------------- [T-Eq]
+    Γ |- Eq? e1 e2 : bool
+
+Γ |- e : bool    Γ |- e1 : t    Γ |- e2 : t
+------------------------------------------- [T-If]
+         Γ |- if e then e1 else e2 : t
+
+
+(x, t) ϵ Γ
+---------- [T-Var]
+Γ |- x : t
+
+   Γ; (x, t) |- e : t'
+------------------------ [T-Abs]
+Γ |- \x : t. e : t -> t'
+
+Γ |- e1 : t' -> t   Γ |- e2 : t'
+-------------------------------- [T-App]
+          Γ |- e1 e2 : t
+
+
+Γ |- e : t -> t
+--------------- [T-Fix]
+Γ |- fix e : t
+```
 
 ### Statix
 
