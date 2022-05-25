@@ -29,10 +29,6 @@ test lambda-bound outer var
     [[\x: nat. \y: bool. x + 1]]
   analysis succeeds
 
-test mu-bound var
-    [[fix x x]]
-  analysis succeeds
-
 test closest var - positive
     [[\x: bool. \ x: nat. x + 1]]
   analysis succeeds

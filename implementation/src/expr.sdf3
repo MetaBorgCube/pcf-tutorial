@@ -15,7 +15,7 @@ context-free syntax
   Expr.If = [if [Expr] then [Expr] else [Expr]]
   Expr.Lam = [\[Name] : [Type]. [Expr]]
   Expr.App = [[Expr] [Expr]] {left}
-  Expr.Fix = [fix [Name] [Expr]]
+  Expr.Fix = [fix [Expr]]
   Expr.True = [true]
   Expr.False = [false]
   Expr.Eq = [Eq? [Expr] [Expr]]

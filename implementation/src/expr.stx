@@ -31,6 +31,9 @@ rules
     typeOfExpr(s, e1) == Fun(T', T),
     typeOfExpr(s, e2) == T'.
 
+  typeOfExpr(s, Fix(e)) = T :-
+    typeOfExpr(s, e) == Fun(T, T).
+
 signature
 
   name-resolution
@@ -46,12 +49,6 @@ rules
     s_lam -P-> s,
     !var[x, T] in s_lam,
     typeOfExpr(s_lam, e) == T'.
-
-  typeOfExpr(s, Fix(x, e)) = T :- {s_fix}
-    new s_fix,
-    s_fix -P-> s,
-    !var[x, T] in s_fix,
-    typeOfExpr(s_fix, e) == T.
 
   typeOfExpr(s, Var(x)) = T :- {Ts}
     query var
