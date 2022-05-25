@@ -71,7 +71,7 @@ With a context-free grammar available to us, we can start implementing the synta
 PCF has a simple type system, defined as follows:
 
 ```
-------------- [T-Nat]
+------------ [T-Nat]
 Γ |- n : nat
 
 ---------------- [T-True]
@@ -81,30 +81,35 @@ PCF has a simple type system, defined as follows:
 Γ |- false : bool
 
 
-Γ |- e1 : nat    Γ |- e2 : nat
------------------------------- [T-Add]
-      Γ |- e1 + e2 : nat
+Γ |- e1 : nat
+Γ |- e2 : nat
+------------------ [T-Add]
+Γ |- e1 + e2 : nat
 
-Γ |- e1 : t    Γ |- e2 : t
----------------------------- [T-Eq]
-    Γ |- Eq? e1 e2 : bool
+Γ |- e1 : t
+Γ |- e2 : t
+--------------------- [T-Eq]
+Γ |- Eq? e1 e2 : bool
 
-Γ |- e : bool    Γ |- e1 : t    Γ |- e2 : t
-------------------------------------------- [T-If]
-         Γ |- if e then e1 else e2 : t
+Γ |- e : bool
+Γ |- e1 : t
+Γ |- e2 : t
+----------------------------- [T-If]
+Γ |- if e then e1 else e2 : t
 
 
 (x, t) ϵ Γ
 ---------- [T-Var]
 Γ |- x : t
 
-   Γ; (x, t) |- e : t'
+Γ; (x, t) |- e : t'
 ------------------------ [T-Abs]
 Γ |- \x : t. e : t -> t'
 
-Γ |- e1 : t' -> t   Γ |- e2 : t'
--------------------------------- [T-App]
-          Γ |- e1 e2 : t
+Γ |- e1 : t' -> t
+Γ |- e2 : t'
+----------------- [T-App]
+Γ |- e1 e2 : t
 
 
 Γ |- e : t -> t
