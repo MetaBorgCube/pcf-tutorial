@@ -56,15 +56,19 @@ Aside: Grammars in SDF3 define both lexical and context-free syntax, both of whi
 
 At the end of the file you find a defining of `LAYOUT`, which is the white space (and possibly comments) that are allowed between parts of the context-free syntax that we'll specify together for expressions and types.
 
-In the files `expr.sdf` and `type.sdf3` you will find the sort definitions for expressions and types with some but not all rules. As you can see, there is [template syntax](https://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#templates) in SDF3 which is both a convenient way to write your syntax and a hint for how it might be formatted in a program. Try writing some of the grammar yourself.
+In the files `expr.sdf` and `type.sdf3` you will find the sort definitions for expressions and types with some but not all rules. As you can see, there is [template syntax](https://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#templates) in SDF3 which is both a convenient way to write your syntax and a hint for how it might be formatted in a program.
+
+> Exercise. Try writing the remaining part of the grammar yourself.
 
 Once you've built the project again, you can try out the newly added parts of a grammar. In `test/test.spt` file you will find test written in the [SPoofax Testing language SPT](https://www.metaborg.org/en/latest/source/langdev/meta/lang/spt/index.html). In this special language workbench testing language we can test many things on a high level. For now we can more `parse succeeds` and `parse fails` tests and see failing tests get an error marker in the editor immediately. You can also with a `parse to` test where you can specify the abstract syntax tree you expect.
 
-- TODO: explain how to write a PCF file with a program and show the abstract syntax tree
+- TODO: explain how to write a PCF file with a program and show the abstract syntax tree (AZ: I committed an `example.pcf` in the template, that should be free to edit).
 
 You might find that writing a program `1 + 1 + 1` fails both expectations, because it is in our PCF language, but the parsing isn't entirely _successful_. Instead the result, which you can also write as an expectation, is `parse ambiguous`. We need to specify in the grammar what the associativity of the program is, whether it's `(1 + 1) + 1` or `1 + (1 + 1)`. Let's pick the former and use the `{left}` annotation on the `Expr.Add` rule. Now your double-add test should work. In fact we can now use the `parse to` test to specify that we expect `Add(Add(Num("1"), Num("1")), Num("1"))`. That is a little cumbersome to write though. What we can also do is write another program between double brackets: `[[(1 + 1) + 1]]`. Because the round brackets are not in the AST, this comes down to the same test.
 
-Now that we're familiar with ambiguities and testing for them, we should root out the other ones in our grammar. You'll find that most grammar productions in PCF are not ambiguous with themselves, but mostly with each other. This is a priority problem, which is specified in a `context-free priorities` section of the grammar. You can write `Expr.App > Expr.Add` to specify that application binds tighter than addition. You can write out pairs of these with commas in between, or a longer chain of `>`, which is more common and is a reminder that priority is transitive. You can also make groups of expressions of the same priority, like `{ Expr.If  Expr.Lam  Expr.Fix }`. See if you can figure out a good set of priorities and write some tests for them. You can check your list against our in the `implementation`.
+Now that we're familiar with ambiguities and testing for them, we should root out the other ones in our grammar. You'll find that most grammar productions in PCF are not ambiguous with themselves, but mostly with each other. This is a priority problem, which is specified in a `context-free priorities` section of the grammar. You can write `Expr.App > Expr.Add` to specify that application binds tighter than addition. You can write out pairs of these with commas in between, or a longer chain of `>`, which is more common and is a reminder that priority is transitive. You can also make groups of expressions of the same priority, like `{ Expr.If  Expr.Lam  Expr.Fix }`.
+
+> Exercise. See if you can figure out a good set of priorities and write some tests for them. You can check your list against ours in the `implementation`.
 
 ## Static Semantics
 
