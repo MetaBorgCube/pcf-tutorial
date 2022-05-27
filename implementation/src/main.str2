@@ -13,10 +13,10 @@ imports
 rules // Analysis
 
   pre-analyze :: ? -> ?
-  pre-analyze  = explicate-injections-pcf-Start
+  pre-analyze  = explicate-injections-pcfsolution-Start
 
   post-analyze :: ? -> ?
-  post-analyze = implicate-injections-pcf-Start
+  post-analyze = implicate-injections-pcfsolution-Start
 
 
   editor-analyze :: ? -> ?

@@ -1,6 +1,6 @@
-shared.defaultArtifactId=pcf
-shared.defaultClassPrefix=Pcf
+shared.defaultArtifactId=pcf.solution
+shared.defaultClassPrefix=PcfSolution
 shared.defaultGroupId=org.metaborg
-shared.defaultPackageId=mb.pcf
+shared.defaultPackageId=mb.pcf.solution
 shared.defaultVersion=0.1.0
-stratego.source.files.languageStrategyAffix=pcf
+stratego.source.files.languageStrategyAffix=pcfsolution

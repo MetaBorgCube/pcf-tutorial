@@ -55,7 +55,7 @@ rules
     LetRecF(x1, x2, t1, t2, e1, e2) ->
       LetRec(x1, Fun(t1, t2), Lam(x2, t1, e1), e2)
 
-signature
+signature // Signature of intermediate representation not in surface syntax.
   sorts
     LetKind
   constructors
