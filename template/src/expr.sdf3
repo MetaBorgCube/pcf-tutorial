@@ -1,0 +1,40 @@
+module expr
+
+imports
+
+  lex
+  type
+
+context-free sorts
+
+  Expr
+
+context-free syntax
+
+  Expr.Num = Number
+  Expr.True = [true]
+  // Expr.False = ???
+
+  Expr.Eq = [Eq? [Expr] [Expr]]
+  // Expr.Add = ???
+  // Expr.If = ???
+
+  // Expr.Var = ???
+  // Expr.Lam = ???
+  // Expr.App = ???
+
+  // Expr.Fix = ???
+
+  Expr = [([Expr])] {bracket}
+
+context-free priorities
+
+context-free syntax // Extension 1
+
+  // Expr.Let = ???
+  // Expr.LetF = ???
+  // Expr.LetRec = ???
+  // Expr.LetRecF = ???
+
+context-free priorities
+  

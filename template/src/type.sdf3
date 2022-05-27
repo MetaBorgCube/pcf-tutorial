@@ -1,0 +1,19 @@
+module type
+
+imports
+
+  lex
+
+context-free sorts
+
+  Type
+
+context-free syntax
+
+  Type.Bool = [bool]
+  // Type.Nat = ???
+  // Type.Fun = ???
+  
+  
+  // Type = ??? // bracket rule
+  

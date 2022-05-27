@@ -1,0 +1,59 @@
+module expr
+
+imports
+
+  signatures/expr-sig
+  signatures/type-sig
+
+rules
+
+  typeOfExpr: scope * Expr -> Type
+
+  typeOfExpr(s, True()) = Bool().
+
+  typeOfExpr(s, Eq(e1, e2)) = Bool() :- {T}
+    typeOfExpr(s, e1) == T,
+    typeOfExpr(s, e2) == T.
+
+signature
+
+  name-resolution
+    labels P
+
+  relations
+    var: Name -> Type
+
+rules
+
+  /* typeOfExpr(s, Lam(x, T, e)) = Fun(T, T') :- {s_lam}
+    new s_lam,
+    s_lam -P-> s,
+    !var[x, T] in s_lam,
+    typeOfExpr(s_lam, e) == T'. */
+
+  /* typeOfExpr(s, Var(x)) = T :- {Ts}
+    query var
+      filter P* and { x' :- x' == x }
+         min $ < P
+          in s |-> Ts,
+    referenceTypeOk(x, T, Ts). */
+
+rules // Handle variable query result properly.
+
+  referenceTypeOk: Name * Type * list((path * (Name * Type)))
+
+  referenceTypeOk(x, _, []) :-
+    false | error $[Could not resolve variable [x].].
+
+  referenceTypeOk(x, T, [(_, (x', T'))]) :-
+    T == T' | error $[Expected [x] to have type [T], but was [T'].],
+    @x.type := T,
+    @x.ref := x'.
+
+  referenceTypeOk(x, _, [_ | _]) :-
+    false | error $[Reference to [x] is ambiguous.].
+
+rules // Catch-all rule, useful during development
+
+  typeOfExpr(_, e) = _ :-
+    try { false } | note $[No type inference rule for [e] specified yet.].

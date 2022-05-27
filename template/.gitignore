@@ -1,0 +1,15 @@
+# macOS
+*.DS_Store
+# Java
+*.class
+*.jar
+hs_err_pid*
+# Eclipse
+/bin
+.settings
+# IntelliJ
+/out
+/.idea
+# Spoofax
+/build
+*.aterm

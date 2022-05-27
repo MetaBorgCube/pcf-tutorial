@@ -1,0 +1,64 @@
+module desugar
+
+imports
+
+  strategolib
+  signatures/-
+
+strategies
+
+  desugar :: TP
+  desugar = topdown(try(desugar-let))
+
+rules
+
+  desugar-let :: TP
+
+  desugar-let = fail
+
+  // desugar-let: ??? -> ???
+
+strategies
+
+  desugar2 :: TP
+  desugar2 = outermost(desugar-let2)
+
+rules
+
+  desugar-let2 :: TP
+
+  // desugar-let2: ??? -> ???
+
+  desugar-let2 = fail
+
+signature // Signature of intermediate representation not in surface syntax.
+  sorts
+    LetKind
+  constructors
+    Normal : LetKind
+    Rec    : LetKind
+
+    Let    : LetKind * Name * Type * Expr * Expr -> Expr
+    LetF   : LetKind * Name * Name * Type * Type * Expr * Expr -> Expr
+
+strategies
+
+  desugar3 :: TP
+  desugar3 =
+    topdown(desugar-let3a)
+  ; outermost(desugar-let3b)
+
+rules
+
+  desugar-let3a :: TP
+
+  desugar-let3a = fail
+
+  // desugar-let3a: ??? -> ???
+
+  desugar-let3b :: TP
+
+  desugar-let3b = fail
+
+  // desugar-let3b: ??? -> ???
+

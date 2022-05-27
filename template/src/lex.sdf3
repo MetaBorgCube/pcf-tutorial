@@ -1,0 +1,33 @@
+module lex
+
+lexical sorts
+
+  Name
+  Number
+  Keyword
+
+lexical syntax
+
+  Name = [A-Za-z] [A-Za-z0-9\_]*
+  Number = [0-9]+
+
+lexical syntax
+
+  Keyword = "if"   | "then"  | "else" |
+            "true" | "false" | "fix" |
+            "let" | "letrec" | "in"
+
+  Name = Keyword {reject}
+
+lexical restrictions
+
+  Name -/- [A-Za-z0-9\_]
+  Number -/- [0-9]
+
+lexical syntax
+
+  LAYOUT = [\ \n\t\v\f\r]
+
+context-free restrictions
+
+  LAYOUT? -/- [\ \n\t\v\f\r]
