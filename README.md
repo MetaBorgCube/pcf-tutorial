@@ -167,7 +167,7 @@ test cannot compare nat and bool [[
 
 Now it is time to look add lambda abstractions and applications. In Statix, typing these constructs uses scope graphs. We will explore how scope graphs work using some example programs.
 
-The rule for lambda abstraction should already defined as follows:
+The rule for lambda abstraction is already defined as follows:
 
 ```
 typeOfExpr(s, Lam(x, T, e)) = Fun(T, T') :- {s_lam}
