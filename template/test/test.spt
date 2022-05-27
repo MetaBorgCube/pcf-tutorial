@@ -4,39 +4,20 @@ test parse empty
     [[]]
   parse fails
 
-test parse plus
-    [[1 + 1 + 1]]
-  parse to
-    [[(1 + 1) + 1]]
+test parse true
+    [[true]]
+  parse succeeds
 
-test parse app
-    [[a b c]]
-  parse to
-    [[(a b) c]]
+test parse Eq?
+    [[Eq? true true]]
+  parse succeeds
 
-test parse eq
-    [[Eq? a b c]]
-  parse to
-    [[(Eq? a b) c]]
+// Static semantics
 
-// Statix semantics
-
-test lambda-bound var
-    [[\ x: nat. x]]
+test type true
+    [[true]]
   analysis succeeds
 
-test lambda-bound outer var
-    [[\x: nat. \y: bool. x + 1]]
+test type Eq?
+    [[Eq? true true]]
   analysis succeeds
-
-test closest var - positive
-    [[\x: bool. \ x: nat. x + 1]]
-  analysis succeeds
-
-test closest var - negative
-    [[\x: nat. \ x: bool. x + 1]]
-  analysis fails
-
-test unbound var
-    [[x]]
-  analysis fails
