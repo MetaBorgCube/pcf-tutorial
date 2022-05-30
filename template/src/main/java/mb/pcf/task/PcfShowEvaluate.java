@@ -1,16 +1,14 @@
 package mb.pcf.task;
 
 import java.io.Serializable;
-import java.util.Objects;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import mb.aterm.common.TermToString;
 import mb.common.result.Result;
-import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.constraint.pie.ConstraintAnalyzeFile;
 import mb.pcf.PcfClassLoaderResources;
 import mb.pcf.PcfScope;
 import mb.pie.api.ExecContext;
@@ -18,6 +16,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 
@@ -27,42 +26,60 @@ public class PcfShowEvaluate implements TaskDef<PcfShowEvaluate.Args, CommandFee
 	public static class Args implements Serializable {
 		private static final long serialVersionUID = 1L;
 
+		public final ResourcePath rootDirectory;
 		public final ResourceKey file;
 
-		public Args(ResourceKey file) {
+		public Args(ResourcePath rootDirectory, ResourceKey file) {
+			this.rootDirectory = rootDirectory;
 			this.file = file;
 		}
 
 		@Override
-		public boolean equals(@Nullable Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-			final Args args = (Args) o;
-			return file.equals(args.file);
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((file == null) ? 0 : file.hashCode());
+			result = prime * result + ((rootDirectory == null) ? 0 : rootDirectory.hashCode());
+			return result;
 		}
 
 		@Override
-		public int hashCode() {
-			return Objects.hash(file);
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Args other = (Args) obj;
+			if (file == null) {
+				if (other.file != null)
+					return false;
+			} else if (!file.equals(other.file))
+				return false;
+			if (rootDirectory == null) {
+				if (other.rootDirectory != null)
+					return false;
+			} else if (!rootDirectory.equals(other.rootDirectory))
+				return false;
+			return true;
 		}
 
 		@Override
 		public String toString() {
-			return "Args{" + "file=" + file + '}';
+			return "Args [rootDirectory=" + rootDirectory + ", file=" + file + "]";
 		}
 	}
 
 	private final PcfClassLoaderResources classloaderResources;
-	private final PcfAnalyze analyze;
+	private final PcfAnalyzeFile analyzeFile;
 	private final PcfEvaluateTask evaluateTask;
 
 	@Inject
-	public PcfShowEvaluate(PcfClassLoaderResources classloaderResources, PcfAnalyze analyze,
+	public PcfShowEvaluate(PcfClassLoaderResources classloaderResources, PcfAnalyzeFile analyzeFile,
 			PcfEvaluateTask evaluateTask) {
 		this.classloaderResources = classloaderResources;
-		this.analyze = analyze;
+		this.analyzeFile = analyzeFile;
 		this.evaluateTask = evaluateTask;
 	}
 
@@ -71,9 +88,9 @@ public class PcfShowEvaluate implements TaskDef<PcfShowEvaluate.Args, CommandFee
 		context.require(classloaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 		final ResourceKey file = args.file;
 
-		final Supplier<Result<IStrategoTerm, ?>> analyzedAstSupplier = analyze
-				.createSupplier(new ConstraintAnalyzeTaskDef.Input(file, null)).map(analysisResult -> {
-					return analysisResult.map(output -> output.result.analyzedAst);
+		final Supplier<Result<IStrategoTerm, ?>> analyzedAstSupplier = analyzeFile
+				.createSupplier(new ConstraintAnalyzeFile.Input(args.rootDirectory, args.file)).map(analysisResult -> {
+					return analysisResult.map(output -> output.ast);
 				});
 
 		return context.require(evaluateTask, analyzedAstSupplier).mapOrElse(

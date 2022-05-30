@@ -1,13 +1,14 @@
 package mb.pcf.task;
 
+import java.io.IOException;
+
+import javax.inject.Inject;
+
 import mb.pcf.PcfClassLoaderResources;
 import mb.pcf.PcfScope;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.stratego.pie.AstStrategoTransformTaskDef;
-
-import javax.inject.Inject;
-import java.io.IOException;
 
 @PcfScope
 public class PcfEvaluateTask extends AstStrategoTransformTaskDef {
