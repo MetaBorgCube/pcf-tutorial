@@ -56,13 +56,13 @@ Aside: Grammars in SDF3 define both lexical and context-free syntax, both of whi
 
 At the end of the file you find a defining of `LAYOUT`, which is the white space (and possibly comments) that are allowed between parts of the context-free syntax that we'll specify together for expressions and types.
 
-In the files `expr.sdf` and `type.sdf3` you will find the sort definitions for expressions and types with some but not all rules. As you can see, there is [template syntax](https://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#templates) in SDF3 which is both a convenient way to write your syntax and a hint for how it might be formatted in a program.
+In the files `expr.sdf3` and `type.sdf3` you will find the sort definitions for expressions and types with some but not all rules. As you can see, there is [template syntax](https://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#templates) in SDF3 which is both a convenient way to write your syntax and a hint for how it might be formatted in a program.
 
 > Exercise. Try writing the remaining part of the grammar yourself.
 
 Once you've built the project again, you can try out the newly added parts of a grammar. In `test/test.spt` file you will find test written in the [SPoofax Testing language SPT](https://www.metaborg.org/en/latest/source/langdev/meta/lang/spt/index.html). In this special language workbench testing language we can test many things on a high level. For now we can more `parse succeeds` and `parse fails` tests and see failing tests get an error marker in the editor immediately. You can also with a `parse to` test where you can specify the abstract syntax tree you expect.
 
-- TODO: explain how to write a PCF file with a program and show the abstract syntax tree (AZ: I committed an `example.pcf` in the template, that should be free to edit).
+Of course you can also write your PCF programming language in its own editor. There is already an `example.pcf` file, where you can see the syntax highlighting derived from your grammar. You can also view the abstract syntax tree of this program through the menu `Spoofax > Debug > Show parsed AST`. The `(continuous)` version even updates as you update your program.
 
 You might find that writing a program `1 + 1 + 1` fails both expectations, because it is in our PCF language, but the parsing isn't entirely _successful_. Instead the result, which you can also write as an expectation, is `parse ambiguous`. We need to specify in the grammar what the associativity of the program is, whether it's `(1 + 1) + 1` or `1 + (1 + 1)`. Let's pick the former and use the `{left}` annotation on the `Expr.Add` rule. Now your double-add test should work. In fact we can now use the `parse to` test to specify that we expect `Add(Add(Num("1"), Num("1")), Num("1"))`. That is a little cumbersome to write though. What we can also do is write another program between double brackets: `[[(1 + 1) + 1]]`. Because the round brackets are not in the AST, this comes down to the same test.
 
@@ -219,18 +219,18 @@ typeOfExpr(s, Var(x)) = T :- {Ts}
   referenceTypeOk(x, T, Ts).
 ```
 
-We ignore the `referenceTypeOk` constraint for now, as it is only there to ensure the error messages are easier to interpret. The interesting part is the `query` constraint. This constraint takes quite some parameters, which we will analyze one by one.
+We ignore the `referenceTypeOk` constraint for now, as it is only there to ensure the error messages are easier to interpret. The interesting part is the `query` constraint. This constraint takes quite some parameters, which we will analyse one by one.
 
 First, there is the `var` parameter, which is the relation to query. In languages that, unlike PCF, have multiple relations, this argument ensures that the query will only find declarations under the `var` relation, such as the ones asserted by the `T-Abs` rule we've discussed earlier.
 Second, there is the `P*` argument. This is a regular expression that describes valid paths in the scope graph. In this case, it ensures that the query can resolve in the local context, and all parent contexts.
 
 > Exercise. Change `P*` into `P+` and test the program `\x: nat. x`. Does it type correctly? Why (not)?
 
-Third, there is the _data well-formedness_ condition `{ x' :- x' == x }`. This is an anynomous unary predicate that compares the name of a declaration (bound to `x'`) to the reference (`x`). Only declarations for which the constraint holds (i.e., `x' == x` can be solved) are returned in the query answer. This excludes reachable declarations with the wrong name.
+Third, there is the _data well-formedness_ condition `{ x' :- x' == x }`. This is an anonymous unary predicate that compares the name of a declaration (bound to `x'`) to the reference (`x`). Only declarations for which the constraint holds (i.e., `x' == x` can be solved) are returned in the query answer. This excludes reachable declarations with the wrong name.
 
 > Exercise. Change `{ x' :- x' == x }` to `{ x' :- true }` and test the program `\x: nat. \y: bool. x + 1`. Does it type correctly? Why (not)?
 
-Fourth, there is the `$ < P` argument. This argument indicates that the end-of-path label `$` _binds closer_ than the `P` label. This means that shorter paths are preferred over longer paths, essentially modeling shadowing. This is best seen in action:
+Fourth, there is the `$ < P` argument. This argument indicates that the end-of-path label `$` _binds closer_ than the `P` label. This means that shorter paths are preferred over longer paths, essentially modelling shadowing. This is best seen in action:
 
 > Exercise. Remove `$ < P` and test the program `\x: bool. \x: nat. x + 1`. Does it type correctly? Why (not)?
 
@@ -244,7 +244,7 @@ Congratulations! You have now defined a fully functional frontend for PCF.
 
 Type information is often used for editor services and transformations. This is tightly integrated in the Spoofax language as well. For example, hover your mouse over a variable reference for a moment. After some time, a tooltip with (e.g.) the text `Type: Nat()` will show up. Or, even fancier, CTRL-Click (Cmd-Click on Mac) on a reference. Your cursor now should jump to the binder that introduced the variable.
 
-To understand this behavior, we have to look into the second `referenceTypeOk` rule. This rule contains the following constraints:
+To understand this behaviour, we have to look into the second `referenceTypeOk` rule. This rule contains the following constraints:
 
 ```
 @x.type := T,
@@ -294,13 +294,25 @@ As you can see, we can use lambdas for binding variables in a `let`, and we can 
 
 ### Stratego 2
 
-Let's turn these equations into executable code. We will use the term-writing language Stratego 2 for this task. You can find code of this language in `.str2` files such as `main.str2` and `desugar.str2`. In the latter you will find a prewritten strategy `desugar`, defined as a type preserving transformation (`TP`) that traverses topdown and tries to apply the `desugar-let` rewrite rules. In the rewrite rules is `desugar-let`, also type preserving, but it currently fails. You can see an example rewrite rule that turns let bound functions into the applications of lambdas from our equations above, but this uses the `LetF` abstract syntax, which we have not defined yet. So before we start writing our rewrite rules, we should first define the appropriate syntax in `expr.sdf3`. Do that now, and don't forget the priority rules of the newly added syntax!
+Let's turn these equations into executable code. We will use the term-writing language Stratego 2 for this task. You can find code of this language in `.str2` files such as `main.str2` and `desugar.str2`. In the latter you will find a prewritten strategy `desugar`, defined as a type preserving transformation (`TP`) that traverses topdown and tries to apply the `desugar-let` rewrite rules. In the rewrite rules is `desugar-let`, also type preserving, but it currently fails. You can see an example rewrite rule that turns let bound functions into the applications of lambdas from our equations above, but this uses the `LetF` abstract syntax, which we have not defined yet. So before we start writing our rewrite rules, we should first define the appropriate syntax in `expr.sdf3`.
+
+> Exercise: Define syntax for `let` and `letrec`, and don't forget the priority rules of the newly added syntax.
 
 With the syntax defined, we can now start writing our rewrite rules. As suggested by the example one for let-bound functions, we are writing the abstract syntax pattern of our sugar programs with variables, then an arrow `->`, and then the abstract syntax pattern of our final result. This way we only have to traverse our program once to apply the rules. We could go `topdown` or `bottomup` with this approach, either direction works.
 
-We _could_ also write our desugaring differently, in the smaller steps of the equation, by repeatedly applying rewrite rules. Our strategy would then be `outermost` or `innermost`, and we could rewrite our `Let` as usual, but write our `Let(Rec)F` to `Let(Rec)` and our `LetRec` to `Let` with `Fix`. In fact, you can factor out the similarity of the function-binding `let` and `letrec` to their normal counterpart. This is demonstrated in `desugar2` and `desugar3` of the example `implementation`, have a look if you like.
+> Exercise: Write the remaining rewrite rules.
 
-- TODO: explain how to add the desugaring before analysis and how to view the desugared abstract syntax tree of a PCF program
+We _could_ also write our desugaring differently, in the smaller steps of the equation, by repeatedly applying rewrite rules. Our strategy would then be `outermost` or `innermost`, and we could rewrite our `Let` as usual, but write our `Let(Rec)F` to `Let(Rec)` and our `LetRec` to `Let` with `Fix`.
+
+> Exercise: Write the single step rewrite rules.
+> (This is demonstrated in `desugar2` of the example `implementation`.)
+
+You can factor out the similarity of the function-binding `let` and `letrec` to their normal counterpart.
+
+> Bonus Exercise: Define new constructors for `Let` and `LetF` that take an extra argument that marks if it is a normal or `letrec` version. Define a separate desugaring step to transform your program into these constructors. Now define the single step rewrite rules from before, combining the similar one into a single rule.
+> (This is demonstrated in `desugar3` of the example `implementation`.)
+
+With your desugaring now complete, you can add a call to `desugar` to `pre-analyze` in `src/main.str2`. This will eliminate the `let` related constructors before you analyse your program, so you do not need to extend your Statix specification.
 
 ## References
 
