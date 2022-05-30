@@ -12,7 +12,7 @@ You will need an installation of the Spoofax language workbench, you can find [t
 
 You can now import the project following the [instructions on the website](https://www.spoofax.dev/spoofax-pie/develop/guide/eclipse_lwb/import/), which come down to `File > Import...`; `General > Existing Projects into Workspace`; `Next >`; tick `Select root directory:`; `Browse...` to the directory with the `spoofaxc.cfg` and press `Open`; `Finish`.
 
-Now you should `Project > Build Project` after selecting the project in the `Package Explorer`.
+It can very well be that the imported project has some classpath errors. To resolve these, and test whether the project otherwise works properly, you should now select `Project > Build Project` after selecting the project in the `Package Explorer`.
 
 Within the project you will be working on files in the `src` and `test` directories.
 
