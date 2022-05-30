@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.google.inject.Inject;
 
 import mb.aterm.common.TermToString;
 import mb.common.result.Result;
