@@ -1,0 +1,23 @@
+module eval
+
+imports
+
+ signatures/-
+
+rules
+
+  beta-reduce :: Expr -> Expr
+
+  beta-reduce = id // stub
+
+  beta-reduce: Add(e1, e2) -> Num(n)
+    with Num(n1) := <beta-reduce> e1
+       ; Num(n2) := <beta-reduce> e2
+       ; n := <addS> (n1, n2)
+
+rules
+
+  subst(|Name, Expr) :: Expr -> Expr
+
+  subst(name, expr): v@Var(name') -> result
+    where(<eq(name)> name') < !expr + !var => result

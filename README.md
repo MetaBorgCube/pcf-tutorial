@@ -314,6 +314,28 @@ You can factor out the similarity of the function-binding `let` and `letrec` to 
 
 With your desugaring now complete, you can add a call to `desugar` to `pre-analyze` in `src/main.str2`. This will eliminate the `let` related constructors before you analyse your program, so you do not need to extend your Statix specification.
 
+## Extension 1: Tuples
+
+The language can be extended with tuples as follows:
+
+```
+e ::= ...
+  | (e, e)            (tuple construction)
+  | Proj1 e           (left projection)
+  | Proj2 e           (right projection)
+
+t ::= ...
+  | (t, t)            (tuple type)
+```
+
+> Exercise. Define syntax and typing rules for this extension.
+
+## Extension 2: Evaluation
+
+Pure PCF Programs can be evaluated using beta-reduction. The goal of this extension is to implement beta-reduction in Stratego. Some stubs for that have already been placed in `eval.str2`. The `beta-reduce` strategy can be evaluated using the `Spoofax > Evaluate` menu options.
+
+> Exercise. Define the other rules for beta-reduction, until all programs can be normalized.
+
 ## References
 
 - (Mitchell 1996) Mitchell, John C. (1996). The Language PCF. In: Foundations for Programming Languages. https://theory.stanford.edu/~jcm/books/fpl-chap2.ps
