@@ -48,7 +48,7 @@ The grammar in the book is more type-directed, which constrains what programs th
 
 ### SDF3
 
-With a context-free grammar available to us, we can start implementing the syntax of PCF in Spoofax. For this we use SDF3, the Syntax Definition Formalism version 3. You'll find that the `tutorial` project already has some `.sdf3` files ready for you: `lex.sdf3`, `expr.sdf`, `type.sdf3` and `main.sdf3`.
+With a context-free grammar available to us, we can start implementing the syntax of PCF in Spoofax. For this we use SDF3, the Syntax Definition Formalism version 3. You'll find that the `tutorial` project already has some `.sdf3` files ready for you: `lex.sdf3`, `expr.sdf`, `type.sdf3` and `start.sdf3`.
 
 The main file defines the `start symbol` of the grammar which is used by the editor to know where to start parsing. Expressions go in `expr.sdf3`, types in `type.sdf3` and we have already provided you with a lexical syntax in `lex.sdf3`. Have a look, you will find the definition of lexical sorts `Name`, `Number` and `Keyword`, where `Name` and `Number` are defined as regular expressions, and `Keyword` is defined as a few options of literal strings that correspond with keywords from the grammar. Then `Name` is restricted by a rejection rule to not match anything that can be parsed as `Keyword`. The `lexical restrictions` make sure that names and numbers are matched greedily.
 
